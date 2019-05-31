@@ -25,6 +25,7 @@ const cli = <any>meow(`
 		--inline, -i  If you want to embed the sprite into your HTML source, you will want to set this to true in order to prevent the creation of SVG namespace declarations and to set some other attributes for effectively hiding the library sprite.
 		--iconPrefix, -p  The name prefix for each icon.
 		--iconSuffix, -s  The name suffix for each icon.
+		--deepId, -e  id of an icon is the path to that icon from <source-directory>.
 
 	Clean options
 		--stripEmptyTags  Removes empty tags such as "defs" or "g".
@@ -33,7 +34,7 @@ const cli = <any>meow(`
 					Should be repeated for every item, for example:
 						svg2sprite <source-directory> <dist-file> --stripAttrs id --stripAttrs viewBox --stripAttrs x  --stripAttrs y --stripAttrs width --stripAttrs height
 		--stripExtraAttrs  Removes "Sketch" and "xmlns:*" attributes.
-		--stripStyles  Removes "style" attributes from SVG definitions, or a list of the properties that will be removed from style tag and atrribute.
+		--stripStyles  Removes "style" attributes from SVG definitions, or a list of the properties that will be removed from style tag and atrribute. 
 
 	Examples
 		$ svg2sprite images/svg out/sprite.svg --ignore rainbow.svg --iconPrefix prefix
@@ -43,7 +44,8 @@ const cli = <any>meow(`
 		d: 'ignore',
 		i: 'inline',
 		p: 'iconPrefix',
-		s: 'iconSuffix'
+		s: 'iconSuffix',
+		e: 'deepId'
 	}
 });
 
@@ -84,7 +86,7 @@ readdirP(cli.input[0], cli.flags.ignore).then((files) => {
 
 	files = files.map((filename) => {
 		return readFileP(filename, 'utf-8').then((content) => {
-			const name = path.basename(filename, '.svg');
+			const name = cli.flags.deepId ? path.relative(cli.input[0], filename).replace(/\.svg$/, '') : path.basename(filename, '.svg');
 			sprite.add(name, content);
 			stats++;
 		});
